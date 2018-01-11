@@ -10,22 +10,22 @@ The preferred way to install this extension is through [composer](http://getcomp
 Either run
 
 ```
-php composer.phar require --prefer-dist migrateupdater/yii2-migrate-updater "*"
+php composer.phar require --prefer-dist dastanaron/yii2-migrate-updater "*"
 ```
 
 or add
 
 ```
-"migrateupdater/yii2-migrate-updater": "*"
+"dastanaron/yii2-migrate-updater": "*"
 ```
 
-to the require section of your `composer.json` file.
+to the require section of your `composer.json` file
+and run 
+
+```
+php composer.phar update
+```
 
 
 Usage
 -----
-
-Once the extension is installed, simply use it in your code by  :
-
-```php
-<?= \dastanaron\yiimigrate\updater\AutoloadExample::widget(); ?>```
