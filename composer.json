@@ -1,0 +1,21 @@
+{
+    "name": "migrateupdater/yii2-migrate-updater",
+    "description": "The extension allows you to save data when performing a ./yii migrate/redo",
+    "type": "yii2-extension",
+    "keywords": ["yii2","extension"," migrations"," migrate"," update"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "dastanaron",
+            "email": "flow199@yandex.ru"
+        }
+    ],
+    "require": {
+        "yiisoft/yii2": "~2.0.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "dastanaron\\yiimigrate\\updater\\": ""
+        }
+    }
+}
