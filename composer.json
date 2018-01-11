@@ -1,5 +1,5 @@
 {
-    "name": "migrateupdater/yii2-migrate-updater",
+    "name": "dastanaron/yii2-migrate-updater",
     "description": "The extension allows you to save data when performing a ./yii migrate/redo",
     "type": "yii2-extension",
     "keywords": ["yii2","extension"," migrations"," migrate"," update"],
