@@ -1,5 +1,8 @@
 update migration to migrate/redo
 ================================
+
+На русском [ТУТ](README_RU.md)
+
 This extension allows you not to lose data when executing `./yii migrate/redo`
 
 We all know that Yii2 does not have a table update system. There is redo, which
