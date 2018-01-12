@@ -46,74 +46,63 @@ Usage
 The use is fairly simple, you must install this solution
 and connect the class in your migration class.
 
-For simplicity, we need to add the code to the `up ()` section, which will read the dump,
-and in the section `down ()` - create, before deleting.
-
-*** Do not try to write a dump into a public class variable, it will not work,
-since yii console starts methods separately, and not as a single class ***
-
-See the example below:
+To save migrations, you need to connect the migration extension class, and use it,
+to create their own migrations. 
+In addition, you must declare a public variable with the table name `public $tableName`
 
 ```php
+<?php
 
-use yii\db\Migration;
-use dastanaron\yiimigrate\updater\TableData; //connect class
+use dastanaron\yiimigrate\updater\ExtMigration;
 
-class m180109_131518_youtable extends Migration
-{
-    public $tableName = 'test_table'; //Make a variable for the table name, so it's more convenient
-
-    public function up()
-    {
-        $tableOptions = null;
-        if ($this->db->driverName === 'mysql') {
-            $tableOptions = 'CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE=InnoDB';
-        }
-
-        $this->createTable($this->tableName, [
-            'id' => $this->primaryKey(),
-            'user_id' => $this->integer()->defaultValue(0),
-            'category' => $this->integer(4)->null(),
-            'comment' => $this->string(200)->null(),
-            'cr_time' => $this->dateTime()->notNull(),
-            'up_time' => $this->dateTime()->notNull(),
-        ], $tableOptions);
-
-        $this->AlterTable();
-
-        $tableData = new TableData($this->tableName); //call an instance of the class
-
-        $sqldump = $tableData->Dump('read'); //Read the collected dump
-
-        if(!empty($sqldump)) { //check if not empty, then execute it
-            $this->execute($sqldump);
-        }
-
-        $this->addForeignKey('fk_test_1', $this->tableName, 'user_id', 'users', 'id');
-
-    }
-
-    public function down()
-    {
-        $tableData = new TableData($this->tableName); //call an instance of the class
-
-        $tableData->Dump('create'); //Creating dump
-
-        $this->dropTable($this->tableName); //Drop table
-    }
-
-    public function AlterTable()
-    {
-        $sql = "ALTER TABLE `$this->tableName` CHANGE `up_time` `up_time` DATETIME on update CURRENT_TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP;";
-        $this->execute($sql);
-    }
-
-
-    /*public function createTable($table, $columns, $options = null)
-    {
-       $this->dropTable($this->tableName);
-       parent::createTable($table, $columns, $options = null);
-    }*/
-
+class m171226_130601_youmigrationclass extends ExtMigration {
+    
+    public $tableName = 'youmigrationtable';
+    
+    //body class
+    
 }
 ```
+By default, the class uses a flag that allows or denies the storage of data,
+it is specified in the parent class as `public $saveData = true;` if you do not need to try to save data,
+reassign this property in its class to disable this functionality
+
+```php
+<?php
+
+use dastanaron\yiimigrate\updater\ExtMigration;
+
+class m171226_130601_youmigrationclass extends ExtMigration {
+    
+    public $tableName = 'youmigrationtable';
+    
+    public $saveData = false; //disable data saving
+    
+    //body class
+    
+}
+```
+
+This functionality is implemented by the auxiliary class TableData. Below, you can see its methods
+and properties that you can use outside of migration extensions and for diagnostics.
+
+Methods of the TableData class
+--------------
+
+* ** `getData ()` ** - makes a request to the database to receive data, using `yii\db\Query`
+* ** `Dump ($type = 'create')` ** - creates or reads the dump of the table, respectively the passed parameters `create` or` read`
+* ** `getInsertString ()` ** - gets the assembled `insert sql` string. For diagnosis
+
+## Attention
+
+After reading, the dump is deleted
+
+If you want to see an array of collected or other data, then
+you can use the public properties of the class `TableData`
+
+Public Properties
+-------------------
+
+* ** `$tablename` ** - the name of the table, is obtained in the constructor
+* ** `$selecteddata` ** - after the request, will contain an array of data.
+* ** `$sqlstring` ** - the query string is obtained after its assembly

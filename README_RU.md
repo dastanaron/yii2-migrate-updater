@@ -43,100 +43,67 @@ php composer.phar update
 Использование довольно простое, вы должны установить данное решение
 и подключить класс, в вашем классе миграции. 
 
-Для простоты, нам нужно добавить в секцию `up()` код, который будет считывать дамп,
-а в секцию `down()` - создавать, перед удалением.
-
-***Не пробуйте записать дамп в публичную переменную класса, работать не будет,
-так как yii консоль запускает методы раздельно, а не как один класс***
-
-Смотри пример ниже:
+Для сохранения миграций, нужно подключить класс расширения миграций, и использовать именно его,
+для создания своих миграций. Кроме того, необходимо объявить публичную переменную с названием таблицы `public $tableName`
 
 ```php
+<?php
 
-use yii\db\Migration;
-use dastanaron\yiimigrate\updater\TableData; //Подключаем класс
+use dastanaron\yiimigrate\updater\ExtMigration;
 
-class m180109_131518_youtable extends Migration
-{
-    public $tableName = 'test_table'; //Сделайте переменную для названия таблицы, так удобней
-
-    public function up()
-    {
-        $tableOptions = null;
-        if ($this->db->driverName === 'mysql') {
-            $tableOptions = 'CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE=InnoDB';
-        }
-
-        $this->createTable($this->tableName, [
-            'id' => $this->primaryKey(),
-            'user_id' => $this->integer()->defaultValue(0),
-            'category' => $this->integer(4)->null(),
-            'comment' => $this->string(200)->null(),
-            'cr_time' => $this->dateTime()->notNull(),
-            'up_time' => $this->dateTime()->notNull(),
-        ], $tableOptions);
-
-        $this->AlterTable();
-
-        $tableData = new TableData($this->tableName); //вызываем экземпляр класса.
-
-        $sqldump = $tableData->Dump('read'); //Считываем собранный дамп
-
-        if(!empty($sqldump)) { //проверяем, если не пустой, но екзекутаем его
-            $this->execute($sqldump);
-        }
-
-        $this->addForeignKey('fk_test_1', $this->tableName, 'user_id', 'users', 'id'); //Не забываем про связки, если они вам нужны
-
-    }
-
-    public function down()
-    {
-        $tableData = new TableData($this->tableName); //Снова вызываем экземпляр. Здесь не получится выполнять его в одном месте, потому что консоль обращается к этим методам раздельно
-
-        $tableData->Dump('create'); //Создаем дамп
-
-        $this->dropTable($this->tableName); //Удаляем таблицу
-    }
-
-    public function AlterTable()
-    {
-        $sql = "ALTER TABLE `$this->tableName` CHANGE `up_time` `up_time` DATETIME on update CURRENT_TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP;";
-        $this->execute($sql);
-    }
-
-
-    /*public function createTable($table, $columns, $options = null)
-    {
-       $this->dropTable($this->tableName);
-       parent::createTable($table, $columns, $options = null);
-    }*/
-
+class m171226_130601_youmigrationclass extends ExtMigration {
+    
+    public $tableName = 'youmigrationtable';
+    
+    //body class
+    
 }
 ```
 
+По умолчанию, в классе используется флаг, разрешающий или запрещающий сохранение данных,
+он задан в родительском классе как `public $saveData = true;`, если вам не нужно пытаться сохранить данные,
+переназначьте данное свойство в своем классе, чтобы отключить этот функционал
 
-Методы класса
+```php
+<?php
+
+use dastanaron\yiimigrate\updater\ExtMigration;
+
+class m171226_130601_youmigrationclass extends ExtMigration {
+    
+    public $tableName = 'youmigrationtable';
+    
+    public $saveData = false; //disable data saving
+    
+    //body class
+    
+}
+```
+
+Всю функциональность расширения, выполняет вспомогательный класс TableData. Ниже, вы сможете ознакомиться с его методами
+и свойствами, которые вы можете использовать вне расширения миграций и для диагностики.
+
+Методы класса TableData
 --------------
 
-* **getData()** - делает запрос в базу на получение данных, с помощью yii\db\Query
+* **`getData()`** - делает запрос в базу на получение данных, с помощью `yii\db\Query`
 
-* **Dump($type = 'create')** - создает либо читает дамп таблицы, соответственно передаваемые параметры `create` или `read`
+* **`Dump($type = 'create')`** - создает либо читает дамп таблицы, соответственно передаваемые параметры `create` или `read`
 
-* **getInsertString()** - получает собранную `insert sql` строку. Для диагностики
+* **`getInsertString()`** - получает собранную `insert sql` строку. Для диагностики
 
 ## Внимание
 
 После считывания, дамп удаляется
 
 Если требуется посмотреть массив собранный или другие данные, то
-можно воспользоваться публичными свойствами
+можно воспользоваться публичными свойствами классса `TableData`
 
 Публичные свойства
 -------------------
 
-* **$tablename** - имя таблицы, получается в кострукторе
+* **`$tablename`** - имя таблицы, получается в кострукторе
 
-* **selecteddata** - после запроса, будет содержать массив данных.
+* **`selecteddata`** - после запроса, будет содержать массив данных.
 
-* **$sqlstring** - строка запроса, получается после его сборки
+* **`$sqlstring`** - строка запроса, получается после его сборки
