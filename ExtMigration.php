@@ -22,6 +22,7 @@ class ExtMigration extends Migration
     public $tableName;
 
     /**
+     * @inheritdoc
      * @param string $table
      * @param array $columns
      * @param null $options
@@ -35,6 +36,7 @@ class ExtMigration extends Migration
     }
 
     /**
+     * Insert dumpfile to the database table
      * @throws \Exception
      */
     protected function executeDump()
@@ -49,6 +51,7 @@ class ExtMigration extends Migration
     }
 
     /**
+     * @inheritdoc
      * @param string $table
      * @throws \Exception
      */
@@ -59,6 +62,7 @@ class ExtMigration extends Migration
     }
 
     /**
+     * Created dump database table
      * @throws \Exception
      */
     protected function createDump()
@@ -69,6 +73,7 @@ class ExtMigration extends Migration
     }
 
     /**
+     * The method returned the $this->tableName;
      * @return string
      * @throws \Exception
      */
